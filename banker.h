@@ -2,7 +2,7 @@
 #define BANKER_H
 
 #include <stdbool.h>
-#include <pthread.h> // Added for Mutex
+#include <pthread.h> 
 
 #define MAX_PROCESSES 10
 #define MAX_RESOURCES 10

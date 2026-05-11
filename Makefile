@@ -6,4 +6,5 @@ banker: main.c banker.c cli.c
 	$(CC) $(CFLAGS) main.c banker.c cli.c -o banker_gui $(LIBS)
 
 clean:
-	rm -f banker
+	rm -f bankerS
+	

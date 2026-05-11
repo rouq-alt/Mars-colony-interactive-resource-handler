@@ -5,16 +5,15 @@
 #include <stdlib.h> 
 #include <string.h> 
 
-// --- 1. NEW SPACE THEME COLOR PALETTE ---
-Color deepSpaceBg = { 10, 14, 25, 255 };      // Very dark blue background
-Color holoBlue    = { 0, 229, 255, 255 };     // Neon Cyan for inventory/max
-Color safeGreen   = { 0, 255, 102, 255 };     // Bright neon green for safe states
-Color warningRed  = { 255, 51, 102, 255 };    // Crimson red for gridlock/errors
-Color solarYellow = { 255, 204, 0, 255 };     // Bright yellow for active allocations
-Color panelBorder = { 35, 50, 80, 255 };      // Dark muted blue for grid boxes
-Color textDim     = { 150, 170, 200, 255 };   // Muted silver for sub-text
-Color textBright  = { 240, 248, 255, 255 };   // Alice blue for main text
 
+Color deepSpaceBg = { 10, 14, 25, 255 };      
+Color holoBlue    = { 0, 229, 255, 255 };     
+Color safeGreen   = { 0, 255, 102, 255 };     
+Color warningRed  = { 255, 51, 102, 255 };    
+Color solarYellow = { 255, 204, 0, 255 };     
+Color panelBorder = { 35, 50, 80, 255 };      
+Color textDim     = { 150, 170, 200, 255 };   
+Color textBright  = { 240, 248, 255, 255 };   
 
 Font spaceFont;
 Rectangle requestButtons[MAX_PROCESSES];
@@ -24,28 +23,30 @@ void DrawSpaceText(const char* text, int x, int y, int size, Color color) {
 }
 
 void DrawMatrix(int startX, int startY, const char* title, int matrix[MAX_PROCESSES][MAX_RESOURCES], Color color, bool drawButtons) {
-    DrawSpaceText(title, startX, startY, 16, textBright);
+    if (title[0] != '\0') {
+        DrawSpaceText(title, startX, startY, 20, textBright); 
+    }
     
-    int cellWidth = 50; 
-    int cellHeight = 25;
+    int cellWidth = 70; 
+    int cellHeight = 28; 
+    int colOffset = 120; 
     
     for (int j = 0; j < num_resources; j++) {
-        DrawSpaceText(asset_names[j], startX + 85 + j * cellWidth, startY + 25, 10, textDim);
+        DrawSpaceText(asset_names[j], startX + colOffset + 5 + j * cellWidth, startY + 25, 14, textDim); 
     }
     
     for (int i = 0; i < num_processes; i++) {
-        DrawSpaceText(mission_names[i], startX, startY + 45 + i * cellHeight, 14, textDim);
+        DrawSpaceText(mission_names[i], startX, startY + 50 + i * cellHeight, 16, textDim); 
         
         if (drawButtons) {
-            requestButtons[i] = (Rectangle){startX - 20, startY + 44 + i * cellHeight, 15, 15};
+            requestButtons[i] = (Rectangle){startX - 25, startY + 48 + i * cellHeight, 18, 18};
             DrawRectangleRec(requestButtons[i], panelBorder);
-            DrawSpaceText("R", startX - 16, startY + 46 + i * cellHeight, 10, holoBlue);
+            DrawSpaceText("R", startX - 20, startY + 51 + i * cellHeight, 12, holoBlue);
         }
 
         for (int j = 0; j < num_resources; j++) {
-            // Updated to use the sleek panelBorder color instead of boring gray
-            DrawRectangleLines(startX + 80 + j * cellWidth, startY + 40 + i * cellHeight, cellWidth, cellHeight, panelBorder);
-            DrawSpaceText(TextFormat("%d", matrix[i][j]), startX + 100 + j * cellWidth, startY + 46 + i * cellHeight, 16, color);
+            DrawRectangleLines(startX + colOffset + j * cellWidth, startY + 45 + i * cellHeight, cellWidth, cellHeight, panelBorder);
+            DrawSpaceText(TextFormat("%d", matrix[i][j]), startX + colOffset + 28 + j * cellWidth, startY + 50 + i * cellHeight, 18, color); 
         }
     }
 }
@@ -58,13 +59,13 @@ bool is_complete(int p_id) {
 }
 
 void DrawCargoBelts(int startX, int startY) {
-    DrawSpaceText("MISSION PROGRESS (CARGO BELT)", startX, startY, 16, textBright);
-    
-    int beltWidth = 200;
-    int beltHeight = 16;
+    int beltWidth = 320;
+    int beltHeight = 20; 
+    int cellHeight = 28; 
+    int colOffset = 120;
     
     for (int i = 0; i < num_processes; i++) {
-        DrawSpaceText(mission_names[i], startX, startY + 45 + (i * 32), 14, textDim);
+        DrawSpaceText(mission_names[i], startX, startY + 50 + (i * cellHeight), 16, textDim); 
         int total_max = 0;
         int total_alloc = 0;
         for (int j = 0; j < num_resources; j++) {
@@ -75,26 +76,26 @@ void DrawCargoBelts(int startX, int startY) {
         float progress = 0.0f;
         if (total_max > 0) progress = (float)total_alloc / (float)total_max;
         
-        DrawRectangle(startX + 90, startY + 42 + (i * 32), beltWidth, beltHeight, panelBorder);
+        DrawRectangle(startX + colOffset, startY + 48 + (i * cellHeight), beltWidth, beltHeight, panelBorder);
         
         Color beltFillColor = (progress >= 1.0f) ? safeGreen : holoBlue;
-        DrawRectangle(startX + 90, startY + 42 + (i * 32), (int)(beltWidth * progress), beltHeight, beltFillColor);
+        DrawRectangle(startX + colOffset, startY + 48 + (i * cellHeight), (int)(beltWidth * progress), beltHeight, beltFillColor);
         
         if (!is_complete(i) && progress > 0.05f) {
             double time = GetTime() * (1.0f + (total_max / 5.0f)); 
             int offset = ((int)(time * 50.0f)) % beltWidth;
 
             if (offset < (int)(beltWidth * progress)) {
-                DrawRectangle(startX + 90 + offset, startY + 44 + (i * 32), 12, 12, textBright);
+                DrawRectangle(startX + colOffset + offset, startY + 52 + (i * cellHeight), 12, 12, textBright);
             }
         }
-        DrawRectangleLines(startX + 90, startY + 42 + (i * 32), beltWidth, beltHeight, holoBlue);
-        DrawSpaceText(TextFormat("%d%%", (int)(progress * 100)), startX + 95 + beltWidth, startY + 45 + (i * 32), 12, textBright);
+        DrawRectangleLines(startX + colOffset, startY + 48 + (i * cellHeight), beltWidth, beltHeight, holoBlue);
+        DrawSpaceText(TextFormat("%d%%", (int)(progress * 100)), startX + colOffset + 10 + beltWidth, startY + 50 + (i * cellHeight), 16, textBright); 
     }
 }
 
 void DrawSafeSequenceRunway(int startX, int startY, const char* safe_seq_str) {
-    DrawSpaceText("BANKER'S SAFE ROUTING DEPARTURE PATH", startX, startY, 18, safeGreen);
+    DrawSpaceText("BANKER'S SAFE ROUTING DEPARTURE PATH", startX, startY, 20, safeGreen); 
     
     char parsed_seq[MAX_PROCESSES][3]; 
     int count = 0;
@@ -108,17 +109,17 @@ void DrawSafeSequenceRunway(int startX, int startY, const char* safe_seq_str) {
     free(temp_str);
     
     int boxWidth = 80;
-    int boxHeight = 40;
+    int boxHeight = 45; 
     int spacing = 20;
 
     for (int i = 0; i < count; i++) {
         int x = startX + (i * (boxWidth + spacing + 15)); 
-        int y = startY + 40;
+        int y = startY + 30;
         DrawRectangleLines(x, y, boxWidth, boxHeight, safeGreen);
         DrawRectangle(x+2, y+2, boxWidth-4, boxHeight-4, (Color){0, 50, 20, 180}); 
         
-        DrawSpaceText(TextFormat("STEP %d", i+1), x + 10, y + 5, 10, textDim);
-        DrawSpaceText(parsed_seq[i], x + 25, y + 20, 18, textBright);
+        DrawSpaceText(TextFormat("STEP %d", i+1), x + 8, y + 5, 12, textDim); 
+        DrawSpaceText(parsed_seq[i], x + 25, y + 22, 18, textBright); 
         
         if (i < count - 1) {
             int arrowX = x + boxWidth + spacing - 10;
@@ -131,13 +132,12 @@ void DrawSafeSequenceRunway(int startX, int startY, const char* safe_seq_str) {
 
 void HandleMouseInteractivity() {
     Vector2 mousePos = GetMousePosition();
-    
+
     for (int i = 0; i < num_processes; i++) {
         if (CheckCollisionPointRec(mousePos, requestButtons[i])) {
             DrawRectangleRec(requestButtons[i], textBright); 
             DrawSpaceText("R", requestButtons[i].x + 4, requestButtons[i].y + 2, 10, deepSpaceBg);
-
-            DrawSpaceText(TextFormat("Click to AUTO-REQUEST assets for %s", mission_names[i]), mousePos.x + 15, mousePos.y + 15, 12, holoBlue);
+            DrawSpaceText(TextFormat("Click to AUTO-REQUEST assets for %s", mission_names[i]), mousePos.x + 15, mousePos.y + 15, 14, holoBlue);
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 pthread_mutex_lock(&sys_lock); 
@@ -155,7 +155,6 @@ void HandleMouseInteractivity() {
                         }
                     }
                     if (has_req) {
-                        printf("\n[GUI INTERACTION] Submitting autonomous mouse request for %s...\n", mission_names[i]);
                         resource_request(i); 
                     }
                 }
@@ -164,7 +163,6 @@ void HandleMouseInteractivity() {
         }
     }
 }
-
 
 int main() {
     srand(time(NULL));
@@ -188,7 +186,7 @@ int main() {
 
     pthread_t cli_thread;
     pthread_create(&cli_thread, NULL, cli_thread_function, NULL);
-    InitWindow(900, 800, "Mars Colony Interactive Resource Manager");
+    InitWindow(1200, 880, "Mars Colony Interactive Resource Manager");
     SetWindowState(FLAG_WINDOW_TOPMOST); 
     spaceFont = LoadFont("orbitron.ttf");
     SetTargetFPS(60);  
@@ -200,34 +198,33 @@ int main() {
         
         pthread_mutex_lock(&sys_lock);
         
-        DrawSpaceText("AWAITING TERMINAL OVERRIDE...", 20, 20, 16, warningRed);
+        DrawSpaceText("AWAITING TERMINAL OVERRIDE...", 30, 20, 18, warningRed);
         if (sim_active) {
-            DrawSpaceText("AUTONOMOUS STRESS-TEST ACTIVE", 20, 85, 18, solarYellow);
+            DrawSpaceText("AUTONOMOUS STRESS-TEST ACTIVE", 30, 85, 20, solarYellow);
         }
         
         char temp_seq[MAX_PROCESSES * 3];
         bool current_safe_state = is_safe(temp_seq);
         
         if (current_safe_state) {
-            DrawSpaceText("SYSTEM STATUS: MISSION GO (SAFE)", 20, 50, 24, safeGreen);
+            DrawSpaceText("SYSTEM STATUS: MISSION GO (SAFE)", 30, 50, 26, safeGreen);
         } else {
-            DrawSpaceText("SYSTEM STATUS: ABORT / GRIDLOCK DETECTED", 20, 50, 24, warningRed);
+            DrawSpaceText("SYSTEM STATUS: ABORT / GRIDLOCK DETECTED", 30, 50, 26, warningRed);
         }
 
-        DrawSpaceText("BASE ASSET INVENTORY:", 480, 20, 18, textBright);
+        DrawSpaceText("BASE ASSET INVENTORY:", 650, 20, 20, textBright);
         for(int i = 0; i < num_resources; i++) {
-            DrawRectangleLines(480 + i * 65, 45, 55, 40, holoBlue);
-            DrawSpaceText(TextFormat("%d", available[i]), 500 + i * 65, 55, 18, textBright);
-            DrawSpaceText(asset_names[i], 482 + i * 65, 90, 12, textDim);
+            DrawRectangleLines(650 + i * 75, 50, 65, 45, holoBlue);
+            DrawSpaceText(TextFormat("%d", available[i]), 670 + i * 75, 63, 20, textBright);
+            DrawSpaceText(asset_names[i], 650 + i * 75, 100, 14, textDim);
         }
 
-        // Updated matrix calls to use the new colors
-        DrawMatrix(20, 140, "CURRENTLY DEPLOYED (ALLOC) [CLICK BLUE BUTTON]", allocation, solarYellow, true); 
-        DrawMatrix(480, 140, "MAXIMUM REQUIRED (MAX)", max, holoBlue, false);
-        DrawMatrix(20, 420, "PENDING DEPLOYMENT (NEED)", need, warningRed, false);
-
-        DrawCargoBelts(480, 420); 
-        DrawSafeSequenceRunway(20, 680, current_safe_state ? temp_seq : "GRIDLOCK");
+        DrawMatrix(30, 120, "CURRENTLY DEPLOYED (ALLOC)", allocation, solarYellow, true); 
+        DrawMatrix(620, 120, "MAXIMUM REQUIRED (MAX)", max, holoBlue, false);
+        
+        DrawMatrix(30, 440, "", need, warningRed, false);
+        DrawCargoBelts(620, 440); 
+        DrawSafeSequenceRunway(30, 770, current_safe_state ? temp_seq : "GRIDLOCK");
         pthread_mutex_unlock(&sys_lock);
         
         HandleMouseInteractivity(); 

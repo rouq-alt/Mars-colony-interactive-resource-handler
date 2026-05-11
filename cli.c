@@ -94,7 +94,6 @@ void demonstrate_rollback() {
     printf("4. Safety Algorithm confirms Unsafe State.\n");
     printf("5. INITIATING ROLLBACK...\n");
 
-    // Reverse the math!
     for(int i=0; i<num_resources; i++){
         available[i] += temp_req[i];
         allocation[target_mission][i] -= temp_req[i];
