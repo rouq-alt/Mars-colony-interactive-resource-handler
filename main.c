@@ -5,7 +5,7 @@
 #include <stdlib.h> 
 #include <string.h> 
 
-
+// --- SPACE THEME COLOR PALETTE ---
 Color deepSpaceBg = { 10, 14, 25, 255 };      
 Color holoBlue    = { 0, 229, 255, 255 };     
 Color safeGreen   = { 0, 255, 102, 255 };     
@@ -186,6 +186,7 @@ int main() {
 
     pthread_t cli_thread;
     pthread_create(&cli_thread, NULL, cli_thread_function, NULL);
+    
     InitWindow(1200, 880, "Mars Colony Interactive Resource Manager");
     SetWindowState(FLAG_WINDOW_TOPMOST); 
     spaceFont = LoadFont("orbitron.ttf");
@@ -224,6 +225,7 @@ int main() {
         
         DrawMatrix(30, 440, "", need, warningRed, false);
         DrawCargoBelts(620, 440); 
+        
         DrawSafeSequenceRunway(30, 770, current_safe_state ? temp_seq : "GRIDLOCK");
         pthread_mutex_unlock(&sys_lock);
         
